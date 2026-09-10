@@ -1,6 +1,6 @@
 # CookiePulse — Bounty Submission Kit
 
-Everything below is copy-paste ready. Replace the two placeholders (`LIVE_URL`, `GITHUB_URL`) before posting.
+Copy-paste ready. The GitHub URL is live; the only remaining placeholder is `LIVE_URL` — drop in your Vercel URL after deploying.
 
 ---
 
@@ -15,7 +15,7 @@ Cookie Chain says sub-second finality. I didn't take their word for it — I bui
 
 CookiePulse: connect @Nightly_app, send a real 0.001 COOKIE transaction, and watch it confirm while the confetti is still loading.
 
-Live: LIVE_URL 🧵👇
+Live: https://cookiepulse-demo.vercel.app 🧵👇
 
 @TheCookieChain @Superteam
 ```
@@ -39,13 +39,13 @@ My measured confirm time: ~380ms. RPC latency: ~88ms.
 For comparison: standard Solana finality is ~12s to full confirmation, EVM rollups are 15min+. Cookie Chain (SVM) does it sub-second — and my little fortune-cookie app is proof, timestamped on-chain.
 
 Try it (bridge funds first): https://bridge.cookiechain.wtf
-Live: LIVE_URL
-Code: GITHUB_URL
+Live: https://cookiepulse-demo.vercel.app
+Code: https://github.com/peterviktor97-ctrl/cookie-pulse
 
 @TheCookieChain @Nightly_app @Superteam 🍪⚡
 ```
 
-**Posting checklist:** replace `LIVE_URL` and `GITHUB_URL` · tweet 1 links the live app · tweet 3 has all links + tags · thread posted from the account the bounty is registered to.
+**Posting checklist:** replace `LIVE_URL` after the Vercel deploy · tweet 1 links the live app · tweet 3 has all links + tags · thread posted from the account the bounty is registered to.
 
 ---
 
@@ -58,8 +58,8 @@ Short message for the group — paste as-is:
 
 Connect Nightly, crack a fortune cookie with a real 0.001 COOKIE on-chain transaction, watch it confirm in ~380ms. Live balance + chain heartbeat telemetry included.
 
-Live: LIVE_URL
-Code: GITHUB_URL
+Live: https://cookiepulse-demo.vercel.app
+Code: https://github.com/peterviktor97-ctrl/cookie-pulse
 Explorer: https://cookiescan.io
 
 Built for the @TheCookieChain bounty. Feedback welcome — and yes, the confetti fires faster than most chains' finality. ⚡
@@ -107,8 +107,8 @@ WHY IT MATTERS
 Every fortune crack is timestamped, explorer-verifiable proof of Cookie Chain's finality claim. The app turns the chain's headline feature into a shareable, confetti-backed user moment — connect Nightly, pay 0.001 COOKIE, confirm before the confetti finishes.
 
 LINKS
-Live app: LIVE_URL
-Source: GITHUB_URL
+Live app: https://cookiepulse-demo.vercel.app
+Source: https://github.com/peterviktor97-ctrl/cookie-pulse
 Explorer: https://cookiescan.io
 Bridge: https://bridge.cookiechain.wtf
 ```
@@ -130,7 +130,7 @@ An SVM cApp that turns Cookie Chain's sub-second finality into a product: connec
 ## Pre-submission checklist
 
 - [ ] Deploy to Vercel (`npx vercel`) and replace every `LIVE_URL`
-- [ ] Push repo to GitHub and replace every `GITHUB_URL`
+- [x] Push repo to GitHub — done: https://github.com/peterviktor97-ctrl/cookie-pulse
 - [ ] Verify the live app connects Nightly and a test crack confirms
 - [ ] Confirm the treasury pubkey in `lib/constants.ts` is the address the bounty requires (currently the system burner `1111…1111`)
 - [ ] Update the measured latency figures in the thread/submission if a fresh test differs from ~380ms confirm / ~88ms RPC
