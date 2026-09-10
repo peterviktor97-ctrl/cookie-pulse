@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local browser-verification artifacts
+drive-app.cjs
+cookiepulse-home.png
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

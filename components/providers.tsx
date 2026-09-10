@@ -8,6 +8,7 @@ import {
   NightlyWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+import { ToastProvider } from "./toast";
 import { COOKIE_RPC } from "@/lib/constants";
 
 /** Wallet + connection context. Client-only; mounted via dynamic import with ssr:false. */
@@ -32,7 +33,9 @@ export default function WalletProviders({ children }: { children: React.ReactNod
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={autoConnect}>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

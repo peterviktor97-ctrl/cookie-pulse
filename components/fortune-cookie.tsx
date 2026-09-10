@@ -6,6 +6,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import confetti from "canvas-confetti";
 import { Cookie, ExternalLink, Loader2 } from "lucide-react";
+import { useToast } from "./toast";
 import {
   COOKIE_TREASURY,
   CRACK_FEE_LAMPORTS,
@@ -13,12 +14,18 @@ import {
   explorerUrl,
 } from "@/lib/constants";
 
+/** Wallets phrase user rejection differently; match the common variants. */
+function isUserRejection(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /user rejected|rejected the request|cancel|denied|4001/i.test(msg);
+}
+
 type Phase =
   | { kind: "idle" }
   | { kind: "broadcasting" }
   | { kind: "confirming" }
   | { kind: "confirmed"; fortune: string; signature: string }
-  | { kind: "failed"; message: string };
+  | { kind: "failed" };
 
 /** Random fortune, picked once on confirm and stored in phase state so it never reshuffles. */
 function pickFortune(): string {
@@ -61,6 +68,7 @@ export default function FortuneCookie() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
   const { setVisible } = useWalletModal();
+  const toast = useToast();
 
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
@@ -69,8 +77,24 @@ export default function FortuneCookie() {
   async function crack() {
     if (!publicKey) return;
 
+    // Preflight: a wallet with zero balance can't even pay the network fee.
+    const balance = await connection.getBalance(publicKey);
+    if (balance < CRACK_FEE_LAMPORTS) {
+      toast.show({
+        kind: "error",
+        text: "Insufficient COOKIE. Bridge some funds on bridge.cookiechain.wtf to crack the cookie.",
+      });
+      return;
+    }
+
     let signature: string;
     setPhase({ kind: "broadcasting" });
+    const loadingId = toast.show({
+      kind: "loading",
+      sticky: true,
+      text: "Broadcasting to Cookie Chain...",
+    });
+
     try {
       const tx = new Transaction().add(
         SystemProgram.transfer({
@@ -82,26 +106,44 @@ export default function FortuneCookie() {
 
       signature = await sendTransaction(tx, connection);
     } catch (err) {
-      setPhase({
-        kind: "failed",
-        message: err instanceof Error ? err.message : "Transaction rejected",
-      });
+      toast.dismiss(loadingId);
+      setPhase({ kind: "failed" });
+      if (isUserRejection(err)) {
+        toast.show({ kind: "info", text: "Transaction canceled in wallet." });
+      } else {
+        toast.show({
+          kind: "error",
+          text: err instanceof Error ? err.message : "Transaction rejected",
+        });
+      }
       return;
     }
 
     setPhase({ kind: "confirming" });
+    const t0 = performance.now();
     try {
       const latest = await connection.getLatestBlockhash();
       await connection.confirmTransaction(
         { signature, blockhash: latest.blockhash, lastValidBlockHeight: latest.lastValidBlockHeight },
         "confirmed"
       );
+      const elapsedMs = Math.round(performance.now() - t0);
+
+      toast.dismiss(loadingId);
       setPhase({ kind: "confirmed", fortune: pickFortune(), signature });
+      toast.show({
+        kind: "success",
+        text: `Cookie cracked in ${elapsedMs}ms! Check signature on CookieScan.`,
+        href: explorerUrl(signature),
+        hrefLabel: "CookieScan",
+      });
       fireConfetti();
     } catch (err) {
-      setPhase({
-        kind: "failed",
-        message: err instanceof Error ? err.message : "Confirmation failed",
+      toast.dismiss(loadingId);
+      setPhase({ kind: "failed" });
+      toast.show({
+        kind: "error",
+        text: err instanceof Error ? err.message : "Confirmation failed",
       });
     }
   }
@@ -110,7 +152,7 @@ export default function FortuneCookie() {
     idle: "Crack a Cookie (Send 0.001 COOKIE)",
     broadcasting: "Broadcasting to Cookie Chain...",
     confirming: "Broadcasting to Cookie Chain...",
-    confirmed: "Cracked! 🥠",
+    confirmed: "Crack another Cookie",
     failed: "Crumbled — try again",
   };
 
@@ -144,9 +186,7 @@ export default function FortuneCookie() {
       )}
 
       {phase.kind === "failed" && (
-        <p className="mx-auto mt-6 max-w-lg rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-          {phase.message}
-        </p>
+        <p className="mt-6 text-sm text-red-300">Crumbled — check the toast for details.</p>
       )}
 
       {/* Status ticker */}
