@@ -82,10 +82,21 @@ export default function NetworkCards() {
           Your COOKIE Balance
         </div>
         {connected ? (
-          <p className="font-mono text-3xl font-bold text-glow-amber tabular-nums">
-            {balance === null ? "…" : balance}
-            <span className="ml-2 text-sm font-medium text-slate-400">COOKIE</span>
-          </p>
+          <>
+            <p className="font-mono text-3xl font-bold text-glow-amber tabular-nums">
+              {balance === null ? "…" : balance}
+              <span className="ml-2 text-sm font-medium text-slate-400">COOKIE</span>
+            </p>
+            <a
+              href={`${COOKIE_EXPLORER}/account/${publicKey?.toBase58()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-neon-cyan hover:underline"
+            >
+              {publicKey?.toBase58().slice(0, 4)}…{publicKey?.toBase58().slice(-4)}
+              <ExternalLink className="size-3" />
+            </a>
+          </>
         ) : (
           <button
             onClick={() => setVisible(true)}

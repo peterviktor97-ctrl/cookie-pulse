@@ -219,7 +219,7 @@ export default function FortuneCookie() {
       </div>
 
       <p className="mt-4 font-mono text-[11px] text-slate-500">
-        Fee: 0.001 COOKIE → {COOKIE_TREASURY.slice(0, 4)}…{COOKIE_TREASURY.slice(-4)} (system burner)
+        Fee: 0.001 COOKIE → {COOKIE_TREASURY.slice(0, 4)}…{COOKIE_TREASURY.slice(-4)} (burn address)
       </p>
     </section>
   );

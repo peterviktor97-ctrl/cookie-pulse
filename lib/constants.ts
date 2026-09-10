@@ -1,8 +1,10 @@
 export const COOKIE_RPC = "https://rpc.cookiescan.io";
 export const COOKIE_EXPLORER = "https://cookiescan.io";
 
-/** Burner / treasury address that receives the fortune-cookie fee. */
-export const COOKIE_TREASURY = "1111111111111111111111111111111111111111";
+/** Burner / treasury address that receives the fortune-cookie fee.
+ *  Deterministically derived (SHA-256 of "cookiepulse-fortune-treasury-v1") —
+ *  it is a valid pubkey nobody controls, so every crumb sent here is burned. */
+export const COOKIE_TREASURY = "56J5wgobfvtXgA6beNYPV159hsBixWKHwTXDgxwKiYwm";
 
 /** Fee per cracked cookie, in lamports (0.001 COOKIE). */
 export const CRACK_FEE_LAMPORTS = 1_000_000;
