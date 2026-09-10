@@ -24,8 +24,7 @@ type Phase =
   | { kind: "idle" }
   | { kind: "broadcasting" }
   | { kind: "confirming" }
-  /** signature is null in Demo Mode (no on-chain transaction was sent) */
-  | { kind: "confirmed"; fortune: string; signature: string | null }
+  | { kind: "confirmed"; fortune: string; signature: string }
   | { kind: "failed" };
 
 /** Random fortune, picked once on confirm and stored in phase state so it never reshuffles. */
@@ -64,9 +63,7 @@ function fireConfetti() {
   });
 }
 
-/** "Crack the Fortune Cookie": pay 0.001 COOKIE, get a degenerate fortune.
- *  Falls back to Demo Mode — full confetti + fortune, no on-chain tx —
- *  when the wallet is empty or the RPC transfer fails. */
+/** "Crack the Fortune Cookie": pay 0.001 COOKIE, get a degenerate fortune. */
 export default function FortuneCookie() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, connected } = useWallet();
@@ -77,29 +74,20 @@ export default function FortuneCookie() {
 
   const busy = phase.kind === "broadcasting" || phase.kind === "confirming";
 
-  /** Success path without an on-chain transaction: fortune + confetti, marked as demo. */
-  function demoCrack() {
-    setPhase({ kind: "confirmed", fortune: pickFortune(), signature: null });
-    toast.show({ kind: "success", text: "Demo Crack Confirmed" });
-    fireConfetti();
-  }
-
   async function crack() {
     if (!publicKey) return;
 
     // Preflight: a wallet with zero balance can't even pay the network fee.
-    // Demo Mode instead — full experience, no on-chain spend.
-    let balance = 0;
-    try {
-      balance = await connection.getBalance(publicKey);
-    } catch {
-      balance = 0;
-    }
+    const balance = await connection.getBalance(publicKey);
     if (balance < CRACK_FEE_LAMPORTS) {
-      demoCrack();
+      toast.show({
+        kind: "error",
+        text: "Insufficient COOKIE. Bridge some funds on bridge.cookiechain.wtf to crack the cookie.",
+      });
       return;
     }
 
+    let signature: string;
     setPhase({ kind: "broadcasting" });
     const loadingId = toast.show({
       kind: "loading",
@@ -107,7 +95,6 @@ export default function FortuneCookie() {
       text: "Broadcasting to Cookie Chain...",
     });
 
-    let signature: string;
     try {
       const tx = new Transaction().add(
         SystemProgram.transfer({
@@ -120,13 +107,14 @@ export default function FortuneCookie() {
       signature = await sendTransaction(tx, connection);
     } catch (err) {
       toast.dismiss(loadingId);
+      setPhase({ kind: "failed" });
       if (isUserRejection(err)) {
-        // The user said no — never fake a success on top of that.
-        setPhase({ kind: "failed" });
         toast.show({ kind: "info", text: "Transaction canceled in wallet." });
       } else {
-        // RPC/wallet failure → Demo Mode keeps the moment alive.
-        demoCrack();
+        toast.show({
+          kind: "error",
+          text: err instanceof Error ? err.message : "Transaction rejected",
+        });
       }
       return;
     }
@@ -152,8 +140,6 @@ export default function FortuneCookie() {
       fireConfetti();
     } catch (err) {
       toast.dismiss(loadingId);
-      // The transaction was broadcast, so it may still land — don't pretend
-      // it didn't happen. Surface the error, let the user retry manually.
       setPhase({ kind: "failed" });
       toast.show({
         kind: "error",
@@ -187,21 +173,15 @@ export default function FortuneCookie() {
           <p className="font-mono text-lg text-dough-400 text-glow-amber">
             “{phase.fortune}”
           </p>
-          {phase.signature ? (
-            <a
-              href={explorerUrl(phase.signature)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-neon-cyan hover:underline"
-            >
-              View transaction on CookieScan
-              <ExternalLink className="size-3" />
-            </a>
-          ) : (
-            <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-neon-mint">
-              Demo Mode — no COOKIE was spent
-            </p>
-          )}
+          <a
+            href={explorerUrl(phase.signature)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-neon-cyan hover:underline"
+          >
+            View transaction on CookieScan
+            <ExternalLink className="size-3" />
+          </a>
         </div>
       )}
 
