@@ -29,7 +29,8 @@ CookiePulse is built for **Cookie Chain (SVM)** and leans on its **sub-second fi
 - **`app/layout.tsx`** — root layout; wraps the app in a client-only boundary
 - **`components/client-root.tsx`** — loads wallet providers via `dynamic(..., { ssr: false })` so no wallet or connection code ever runs during server render; this is what keeps SSR hydration clean
 - **`components/providers.tsx`** — `ConnectionProvider` (Cookie Chain RPC) → `WalletProvider` (memoized Nightly/Phantom/Solflare adapters + auto-connect) → `WalletModalProvider` → `ToastProvider`
-- **`components/network-cards.tsx`** — balance card, chain-status heartbeat, explorer card
+- **`components/network-cards.tsx`** — balance card (with wallet address + CookieScan link), chain-status heartbeat, explorer card
+- **`components/pulse-feed.tsx`** — live treasury activity: recent cracks feed (polls `getSignaturesForAddress` every 15 s) and the COOKIE-burned counter
 - **`components/fortune-cookie.tsx`** — the transaction flow: preflight balance check → `SystemProgram.transfer` of 0.001 COOKIE → blockhash-based confirmation timed with `performance.now()` → confetti + fortune
 - **`components/toast.tsx`** — custom toast context (sticky loading toasts, auto-dismiss, inline explorer links)
 - **`lib/constants.ts`** — RPC/explorer endpoints, `CRACK_FEE_LAMPORTS = 1_000_000`, treasury pubkey, fortune list
@@ -74,7 +75,7 @@ To crack cookies you need COOKIE in your wallet. Bridge funds via the official C
 - **Explorer:** [cookiescan.io](https://cookiescan.io)
 - **RPC:** `https://rpc.cookiescan.io`
 - **Bridge:** [bridge.cookiechain.wtf](https://bridge.cookiechain.wtf)
-- **Treasury (fortune fee sink):** `1111111111111111111111111111111111111111`
+- **Burn address (fortune fee sink):** `56J5wgobfvtXgA6beNYPV159hsBixWKHwTXDgxwKiYwm`
 
 ## License
 

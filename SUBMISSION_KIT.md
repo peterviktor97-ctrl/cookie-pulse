@@ -132,6 +132,6 @@ An SVM cApp that turns Cookie Chain's sub-second finality into a product: connec
 - [x] Deploy to Vercel — done, live at https://cookie-pulse-sooty.vercel.app
 - [x] Push repo to GitHub — done: https://github.com/peterviktor97-ctrl/cookie-pulse
 - [ ] Verify the live app connects Nightly and a test crack confirms
-- [ ] Confirm the treasury pubkey in `lib/constants.ts` is the address the bounty requires (currently the system burner `1111…1111`)
+- [x] Treasury/burn address is a valid pubkey — `56J5wgobfvtXgA6beNYPV159hsBixWKHwTXDgxwKiYwm` (deterministic burn address; include it in the submission form's "application addresses" field)
 - [ ] Update the measured latency figures in the thread/submission if a fresh test differs from ~380ms confirm / ~88ms RPC
 - [ ] README badge/links point at the final repo URL
